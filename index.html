@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO chat</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="js/build.js"></script>
+    <script src="js/uikit.min.js"></script>
+</head>
+
+<body>
+    <div id="overlay">
+        <form id="nickname-form" action="" class="uk-form-stacked">
+            <label for="nickname">NICKNAME?</label>
+            <div class="uk-form-controls">
+                <input id="nickname" class="uk-input uk-form-width-large uk-form-large" type="text"/><br>
+                <button id="submit" name="submit" class="uk-button uk-button-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="container">
+        <div id="info-div">
+            <ul id="users-list"></ul>
+        </div>
+        <div id="text-div">
+            <div id="messages-div">
+                <ul id="messages" class="uk-list uk-list-large uk-list-divider"></ul>
+            </div>
+            <div id="send-div">
+                <form id="send-form" class="flex" action="">
+                    <input id="m" autocomplete="off" class="uk-form-large" />
+                    <button class="uk-button uk-button-large uk-button-primary">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
