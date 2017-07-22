@@ -152,15 +152,15 @@ $(document).ready(function () {
     });
 
     socket.on('user connect', function (user) {
-        $('#messages').append($('<li>').text(user.username +' Connected'));
+        $('#messages').append($('<li>').append('<p>' + user.username +' Connected</p>'));
         currentUsers = user.users;
-        generateUserListView(currentUsers);
+        UpdateList(currentUsers);
         audioElement.setAttribute('src', 'audio/user-login.mp3');
         audioElement.play();
     });
     socket.on('chat message', function (msg) {
         let listHtml = '<span class="uk-label">' + cleanInput(msg.username) + '</span>'
-            + '  ' + cleanInput(msg.message);
+            + '<p>' + cleanInput(msg.message) + '</p>';
 
         $('#messages').append($('<li>').append(listHtml));
         // play notification sound
@@ -174,7 +174,7 @@ $(document).ready(function () {
     socket.on('disconnect', function (user) {
         $('#messages').append($('<li>').text(user.username + ' Disconnected'));
         currentUsers = user.users;
-        generateUserListView(currentUsers);
+        UpdateList(currentUsers);
         audioElement.setAttribute('src', 'audio/user-disconnected.mp3');
         audioElement.play();
     });
@@ -200,11 +200,15 @@ function cleanInput(input) {
     return $('<div/>').text(input).text();
 }
 
-function generateUserListView(userArray) {
+function UpdateList(userArray) {
     let userList = $('#users-list').empty();
+    let userCountDiv = $('#users-count-div');
+    let onlineUserCnt = userArray.length;
     for (let user of userArray) {
         userList.append($('<li>').text(user.username));
     }
+    // update online user count
+    userCountDiv.children('p').text('Online Users: ' + onlineUserCnt);
 }
 
 /***/ })
