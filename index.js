@@ -11,17 +11,27 @@ app.get('/', function (req, res) {
 });
 
 // All Users
-var currentUsers = [];
+var currentUsers = {};
 
 io.on('connection', function (socket) {
 
     socket.on('new user', function (user) {
-        currentUsers.push(user);
-        socket.user = user;
-        io.emit('user connect', {
-            username: socket.user.username,
-            users: currentUsers
-        });
+        var id = user.username.toLowerCase();
+        if (currentUsers.hasOwnProperty(id)) {
+            io.to(socket.id).emit('id exists', user.username);
+        }
+        else if (id.length < 3 || id.length > 10) {
+            io.to(socket.id).emit('invalid id length', id.length);
+        }
+        else {
+            currentUsers[id] = user;
+            socket.user = user;
+            io.to(socket.id).emit('connect success');
+            io.emit('new user connect', {
+                username: socket.user.username,
+                users: currentUsers
+            });
+        }
     });
     socket.on('chat message', function (msg) {
         io.emit('chat message', {
@@ -30,12 +40,18 @@ io.on('connection', function (socket) {
         });
     });
     socket.on('disconnect', function () {
-        var userIdx = currentUsers.indexOf(socket.user);
-        currentUsers.splice(userIdx, 1);
-        io.emit('disconnect', {
-            username: socket.user.username,
-            users: currentUsers
-        });
+        //check if valid user exists on disconnection
+        if(socket.user) {
+            var id = socket.user.username.toLowerCase();
+            console.log(currentUsers);
+            if (currentUsers.hasOwnProperty(id)) {
+                delete currentUsers[id];
+                io.emit('disconnect', {
+                    username: socket.user.username,
+                    users: currentUsers
+                });
+            }
+        }
     });
 });
 

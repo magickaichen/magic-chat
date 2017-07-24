@@ -118,23 +118,20 @@ $(document).ready(function () {
     let nameForm = $('#nickname-form');
     let msgForm = $('#send-form');
     let msgDiv = $('#messages-div');
+    let nameInput = $('#nickname');
 
     // self user (the current client user)
     let selfUser = null;
-    let currentUsers = [];
+    let currentUsers = null;
 
     // dynamically create an audio element
     let audioElement = document.createElement('audio');
-
-
-
 
     nameForm.submit(function () {
         let name = $('#nickname');
         if (name.val()) {
             selfUser = new User(name.val());
             socket.emit('new user', selfUser);
-            nameForm.parent().css('display', 'none');
         }
         return false;
     });
@@ -151,7 +148,44 @@ $(document).ready(function () {
         return false;
     });
 
-    socket.on('user connect', function (user) {
+    // successfully connected
+    socket.on('connect success', function () {
+        //hide name input form on successful connect
+        nameForm.parent().css('display', 'none');
+    });
+
+    // duplicate username
+    socket.on('id exists', function (name) {
+        nameInput.addClass("uk-form-danger");
+        UIkit.notification({
+            message: 'Boomer! Nickname '+ name +' Already Exists!',
+            status: 'danger',
+            pos: 'top-center',
+            timeout: 2000
+        });
+    });
+
+    socket.on('invalid id length', function (length) {
+        nameInput.addClass("uk-form-warning");
+        if (length < 3) {
+            UIkit.notification({
+                message: 'C\'mon, Get a Longer Name!',
+                status: 'warning',
+                pos: 'top-center',
+                timeout: 2000
+            });
+        }
+        else {
+            UIkit.notification({
+                message: 'Your Name Is Too Long!',
+                status: 'warning',
+                pos: 'top-center',
+                timeout: 2000
+            });
+        }
+    });
+
+    socket.on('new user connect', function (user) {
         $('#messages').append($('<li>').append('<p>' + user.username +' Connected</p>'));
         currentUsers = user.users;
         UpdateList(currentUsers);
@@ -200,11 +234,13 @@ function cleanInput(input) {
     return $('<div/>').text(input).text();
 }
 
-function UpdateList(userArray) {
+function UpdateList(usersObj) {
     let userList = $('#users-list').empty();
     let userCountDiv = $('#users-count-div');
-    let onlineUserCnt = userArray.length;
-    for (let user of userArray) {
+    let onlineUserCnt = Object.keys(usersObj).length;
+    console.log(usersObj);
+    for (let key of Object.keys(usersObj)) {
+        let user = usersObj[key];
         userList.append($('<li>').text(user.username));
     }
     // update online user count
